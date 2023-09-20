@@ -1,0 +1,7 @@
+{
+  "name": "potato",
+  "type": "module",
+  "scripts": {
+    "pepper": "ts-node ./taste/salty/salty.ts"
+  }
+}
