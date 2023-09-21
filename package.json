@@ -2,8 +2,7 @@
   "name": "potato",
   "type": "module",
   "scripts": {
-    "pepper": "ts-node ./taste/pepper/pepper.ts",
-    "salty": "ts-node ./taste/salty/salty.ts"
+    "dev": "node --loader=ts-node/esm --no-warnings ./note/test.ts"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.415.0",

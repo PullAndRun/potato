@@ -49,7 +49,7 @@ async function setConfig() {
   }
   for (const fileDirent of fileDirents) {
     if (!fileDirent.fileName) {
-      return;
+      continue;
     }
     config = {
       ...(config || {}),
