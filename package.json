@@ -2,6 +2,40 @@
   "name": "potato",
   "type": "module",
   "scripts": {
-    "pepper": "ts-node ./taste/salty/salty.ts"
+    "pepper": "ts-node ./taste/pepper/pepper.ts",
+    "salty": "ts-node ./taste/salty/salty.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.415.0",
+    "@aws-sdk/client-s3": "^3.414.0",
+    "@aws-sdk/lib-storage": "^3.414.0",
+    "@koa/cors": "^4.0.0",
+    "@koa/multer": "^3.0.2",
+    "@koa/router": "^12.0.0",
+    "arg": "^5.0.2",
+    "aws-sdk": "^2.1461.0",
+    "dayjs": "^1.11.10",
+    "fast-xml-parser": "^4.3.0",
+    "he": "^1.2.0",
+    "icqq": "^0.5.4",
+    "jsdom": "^22.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "koa": "^2.14.2",
+    "node-schedule": "^2.1.1",
+    "nodemailer": "^6.9.5",
+    "pg": "^8.11.3",
+    "pg-hstore": "^2.3.4",
+    "qiniu": "^7.9.0",
+    "sequelize": "^6.33.0",
+    "sharp": "^0.32.6",
+    "ts-node": "^10.9.1",
+    "uuid": "^9.0.1",
+    "validator": "^13.11.0",
+    "winston": "^3.10.0",
+    "zod": "^3.22.2"
+  },
+  "devDependencies": {
+    "@types/node-schedule": "^2.1.0",
+    "@types/uuid": "^9.0.4"
   }
 }
