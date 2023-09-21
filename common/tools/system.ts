@@ -40,7 +40,7 @@ async function getFileDirents(folder: string) {
 }
 
 /**
- * 读取设置，覆盖到全局变量config。
+ * 读取设置文件，覆盖到全局变量config。
  */
 async function setConfig() {
   const fileDirents = await getFileDirents("config");
@@ -62,7 +62,7 @@ async function setConfig() {
 }
 
 /**
- * 获取某个设置。
+ * 获取设置。
  * @param type 参见根目录config文件夹，type为文件名。
  */
 function getConfig(type: string) {
@@ -74,7 +74,7 @@ function getConfig(type: string) {
 
 /**
  * 安全转换String到JSON
- * @param str 待转换成JSON的String
+ * @param str 待转换JSON的String
  */
 function parseJson(str: string) {
   try {
