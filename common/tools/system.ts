@@ -13,7 +13,7 @@ import path from "path";
 let config: any = undefined;
 
 /**
- * 格式化Args。
+ * 格式化Args成JSON。
  * @param param.spec Args的key和值类型的映射关系。
  * @param param.argv Args。
  * @returns 成功返回Args的JSON。失败返回undefined。
@@ -27,7 +27,7 @@ function parseArgs(param: { spec: arg.Spec; argv: Array<string> }) {
 }
 
 /**
- * 获取格式化后的启动脚本的Args。
+ * 获取格式化后的启动脚本的JSON。
  * @param spec Args的key和值类型的映射关系。
  * @returns 成功返回Args的JSON。失败返回undefined。
  */

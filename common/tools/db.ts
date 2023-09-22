@@ -1,4 +1,4 @@
-import { Model, ModelStatic, Sequelize } from "sequelize";
+import { BelongsToOptions, Model, ModelStatic, Sequelize } from "sequelize";
 import { log } from "./log.js";
 import { getCmdArgs, getConfig, getFileDirents } from "./system.js";
 
@@ -7,7 +7,6 @@ const sequelize = new Sequelize(dbConfig);
 
 /**
  * 数据库配置。
- * 一部分来自配置文件，另一部分来自启动脚本。
  */
 function getDbConfig() {
   const cmdArgs = getCmdArgs({
@@ -37,6 +36,21 @@ async function testConnection() {
   return sequelize.authenticate().catch((e) => {
     throw new Error(`数据库连接失败，原因:${e}。`);
   });
+}
+
+/**
+ * 给model添加belongsTo。
+ * @param source 谁belongsTo。
+ * @param target belongsTo谁。
+ * @param option belongsTo参数。
+ */
+function belongsTo(
+  source: ModelStatic<Model<any, any>>,
+  target: ModelStatic<Model<any, any>>,
+  option: BelongsToOptions
+) {
+  source.belongsTo(target, option);
+  return source;
 }
 
 /**
@@ -79,4 +93,4 @@ async function init() {
   await initModel();
 }
 
-export { dbSync, init, sequelize };
+export { belongsTo, dbSync, init, sequelize };
