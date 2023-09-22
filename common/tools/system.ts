@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
+import arg from "arg";
 
 /**
  * 设置，参见根目录config文件夹内的json。
@@ -9,6 +10,19 @@ import path from "path";
  * 使用getConfig()读取。
  */
 let config: any = undefined;
+
+/**
+ * 判断是否为发布模式。
+ * 发布模式需要在启动参数添加--prod。
+ */
+function isProd() {
+  return arg(
+    {
+      "--prod": Boolean,
+    },
+    { permissive: false, argv: process.argv.slice(2) }
+  )["--prod"];
+}
 
 /**
  * 获取项目根目录位置。
@@ -88,4 +102,4 @@ async function init() {
   await setConfig();
 }
 
-export { getConfig, getFileDirents, getRootPath, init, parseJson };
+export { getConfig, getFileDirents, getRootPath, init, parseJson, isProd };
