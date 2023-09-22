@@ -39,7 +39,11 @@ const log = createLogger({
  * @returns 日志配置。
  */
 function getLogConfig() {
-  return getConfig("log");
+  const config = getConfig("log");
+  if (!config) {
+    throw new Error(`获取日志配置文件失败。检查config/log.json。`);
+  }
+  return config;
 }
 
 export { log };

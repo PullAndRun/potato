@@ -22,8 +22,12 @@ function getDbConfig() {
     username: cmdArgs["--dbUser"],
     password: cmdArgs["--dbPswd"],
   };
+  const config = getConfig("db");
+  if (!config) {
+    throw new Error(`获取数据库配置文件失败。检查config/db.json。`);
+  }
   return {
-    ...getConfig("db"),
+    ...config,
     ...dbArgs,
   };
 }
@@ -74,7 +78,9 @@ async function dbSync(model: ModelStatic<Model<any, any>>) {
 async function initModel() {
   const fileDirents = await getFileDirents("common/model");
   if (!fileDirents || !fileDirents.length) {
-    throw new Error(`同步所有Model时，从common/model获取Model文件名失败。`);
+    throw new Error(
+      `同步所有Model时，获取Model文件名失败。检查common/model文件夹内是否有文件。`
+    );
   }
   for (const fileDirent of fileDirents) {
     if (!fileDirent.fileName) {
