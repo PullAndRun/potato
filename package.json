@@ -1,9 +1,6 @@
 {
   "name": "potato",
   "type": "module",
-  "scripts": {
-    "dev": "node --loader=ts-node/esm --no-warnings ./note/test.ts"
-  },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.415.0",
     "@aws-sdk/client-s3": "^3.414.0",

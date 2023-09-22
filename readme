@@ -1,0 +1,13 @@
+数据库账户在启动脚本，其他账户在数据库。
+
+单行版：
+node --loader=ts-node/esm --dbName=xxx --dbUser=xxx --dbPswd=xxx --no-warnings ./note/test.ts
+
+多行版：
+node \
+--loader=ts-node/esm \
+--dbName=xxx \
+--dbUser=xxx \
+--dbPswd=xxx \
+--no-warnings \
+./note/test.ts

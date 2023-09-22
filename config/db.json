@@ -1,0 +1,8 @@
+{
+  "timezone": "+08:00",
+  "dialect": "postgres",
+  "logging": false,
+  "define": {
+    "freezeTableName": true
+  }
+}

@@ -1,4 +1,5 @@
 log
 note
+script
 node_modules
 package-lock.json
