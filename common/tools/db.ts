@@ -10,6 +10,8 @@ const sequelize = new Sequelize(dbConfig);
  */
 function getDbConfig() {
   const cmdArgs = getCmdArgs({
+    "--dbHost": String,
+    "--dbPort": Number,
     "--dbName": String,
     "--dbUser": String,
     "--dbPswd": String,
@@ -18,6 +20,8 @@ function getDbConfig() {
     throw new Error(`从启动脚本获取数据库配置失败。`);
   }
   const dbArgs = {
+    host: cmdArgs["--dbHost"],
+    port: cmdArgs["--dbPort"],
     database: cmdArgs["--dbName"],
     username: cmdArgs["--dbUser"],
     password: cmdArgs["--dbPswd"],
