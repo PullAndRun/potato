@@ -1,49 +1,55 @@
-import { createLogger, format, transports } from "winston";
+import { Logger, createLogger, format, transports } from "winston";
 import { formatDate, getConfig } from "./system.js";
 
 /**
  * log配置。
  */
-const logConfig = getLogConfig();
 const { combine, timestamp, json } = format;
 
-/**
- * log实例。
- */
-const log = createLogger({
-  ...logConfig,
-  format: combine(timestamp(), json()),
-  transports: [
-    new transports.Console(),
-    new transports.File({
-      dirname: "./log/error/",
-      filename: `${formatDate("YYYY-MM-DD")}.log`,
-      level: "error",
-    }),
-    new transports.File({
-      dirname: "./log/all/",
-      filename: `${formatDate("YYYY-MM-DD")}.log`,
-    }),
-  ],
-  exceptionHandlers: [
-    new transports.Console(),
-    new transports.File({
-      dirname: "./log/exception/",
-      filename: `${formatDate("YYYY-MM-DD")}.log`,
-    }),
-  ],
-});
+let logger: Logger | undefined = undefined;
 
 /**
- * 获取日志配置。
- * @returns 日志配置。
+ * 初始化日志。
  */
-function getLogConfig() {
-  const config = getConfig("log");
-  if (!config) {
+async function initLogger() {
+  const logConfig = await getConfig("log");
+  if (!logConfig) {
     throw new Error(`获取日志配置文件失败。检查config/log.json。`);
   }
-  return config;
+  logger = createLogger({
+    format: combine(timestamp(), json()),
+    ...logConfig,
+    transports: [
+      new transports.Console(),
+      new transports.File({
+        dirname: "./log/error/",
+        filename: `${formatDate("YYYY-MM-DD")}.log`,
+        level: "error",
+      }),
+      new transports.File({
+        dirname: "./log/all/",
+        filename: `${formatDate("YYYY-MM-DD")}.log`,
+      }),
+    ],
+    exceptionHandlers: [
+      new transports.Console(),
+      new transports.File({
+        dirname: "./log/exception/",
+        filename: `${formatDate("YYYY-MM-DD")}.log`,
+      }),
+    ],
+  });
 }
 
-export { log };
+function getLogger() {
+  if (!logger) {
+    throw new Error(`Logger未初始化。`);
+  }
+  return logger;
+}
+
+async function init() {
+  await initLogger();
+}
+
+export { getLogger, init };

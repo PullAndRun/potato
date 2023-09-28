@@ -1,14 +1,13 @@
 import { BelongsToOptions, Model, ModelStatic, Sequelize } from "sequelize";
-import { log } from "./log.js";
+import { getLogger } from "./log.js";
 import { getCmdArgs, getConfig, getFileDirents } from "./system.js";
 
-const dbConfig = getDbConfig();
-const sequelize = new Sequelize(dbConfig);
+let sequelize: Sequelize | undefined = undefined;
 
 /**
  * 数据库配置。
  */
-function getDbConfig() {
+async function getDbConfig() {
   const cmdArgs = getCmdArgs({
     "--dbHost": String,
     "--dbPort": Number,
@@ -26,7 +25,7 @@ function getDbConfig() {
     username: cmdArgs["--dbUser"],
     password: cmdArgs["--dbPswd"],
   };
-  const config = getConfig("db");
+  const config = await getConfig("db");
   if (!config) {
     throw new Error(`获取数据库配置文件失败。检查config/db.json。`);
   }
@@ -41,9 +40,11 @@ function getDbConfig() {
  * 测试失败则crash。
  */
 async function testConnection() {
-  return sequelize.authenticate().catch((e) => {
-    throw new Error(`数据库连接失败，原因:${e}。`);
-  });
+  return getSequelize()
+    .authenticate()
+    .catch((e) => {
+      throw new Error(`数据库连接失败，原因:${e}。`);
+    });
 }
 
 /**
@@ -69,7 +70,7 @@ function belongsTo(
 async function dbSync(model: ModelStatic<Model<any, any>>) {
   model
     .sync({ alter: { drop: false } })
-    .then((_) => log.info(`表${model.name}同步完毕。`))
+    .then((_) => getLogger().info(`表${model.name}同步完毕。`))
     .catch((e) => {
       throw new Error(`\n表${model.name}同步失败。原因:${e}。`);
     });
@@ -95,12 +96,31 @@ async function initModel() {
       await model.init();
     }
   }
-  log.info(`数据库同步完成。`);
+  getLogger().info(`数据库同步完成。`);
+}
+
+/**
+ * 初始化Sequelize。
+ */
+async function initSequelize() {
+  const config = await getDbConfig();
+  sequelize = new Sequelize(config);
+}
+
+/**
+ * 获取Sequelize。
+ */
+function getSequelize() {
+  if (!sequelize) {
+    throw new Error(`Sequelize未初始化。`);
+  }
+  return sequelize;
 }
 
 async function init() {
+  await initSequelize();
   await testConnection();
   await initModel();
 }
 
-export { belongsTo, dbSync, init, sequelize };
+export { belongsTo, dbSync, getSequelize, init };
