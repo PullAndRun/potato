@@ -102,7 +102,7 @@ async function initModel() {
 /**
  * 初始化Sequelize。
  */
-async function initSequelize() {
+async function setSequelize() {
   const config = await getDbConfig();
   sequelize = new Sequelize(config);
 }
@@ -118,7 +118,7 @@ function getSequelize() {
 }
 
 async function init() {
-  await initSequelize();
+  await setSequelize();
   await testConnection();
   await initModel();
 }

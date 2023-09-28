@@ -11,7 +11,7 @@ let logger: Logger | undefined = undefined;
 /**
  * 初始化日志。
  */
-async function initLogger() {
+async function setLogger() {
   const logConfig = await getConfig("log");
   if (!logConfig) {
     throw new Error(`获取日志配置文件失败。检查config/log.json。`);
@@ -49,7 +49,7 @@ function getLogger() {
 }
 
 async function init() {
-  await initLogger();
+  await setLogger();
 }
 
 export { getLogger, init };
