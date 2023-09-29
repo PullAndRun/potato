@@ -171,7 +171,7 @@ async function initSystem() {
   for (const init of initArr) {
     await init.startInit();
   }
-  logger.log.info(`系统初始化完成。`);
+  logger.winston.info(`系统初始化完成。`);
 }
 
 export {

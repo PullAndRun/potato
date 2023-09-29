@@ -8,17 +8,17 @@ const { combine, timestamp, json } = format;
 
 const logger: {
   logger: Logger | undefined;
-  readonly log: Logger;
-  setLogger: () => Promise<void>;
+  readonly winston: Logger;
+  setWinston: () => Promise<void>;
 } = {
   logger: undefined,
-  get log() {
+  get winston() {
     if (!this.logger) {
       throw new Error(`Logger未初始化。`);
     }
     return this.logger;
   },
-  setLogger: async function () {
+  setWinston: async function () {
     const logConfig = await getConfig("log");
     if (!logConfig) {
       throw new Error(`获取日志配置文件失败。检查config/log.json。`);
@@ -46,7 +46,7 @@ const logger: {
         }),
       ],
     });
-    logger.log.info("Logger实例创建成功。");
+    logger.winston.info("Logger实例创建成功。");
   },
 };
 
@@ -54,7 +54,7 @@ function init() {
   return {
     order: 0,
     startInit: async () => {
-      await logger.setLogger();
+      await logger.setWinston();
     },
   };
 }

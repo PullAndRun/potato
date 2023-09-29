@@ -5,7 +5,7 @@ import { getCmdArg, getConfig, getFileDirents } from "./system.js";
 let database: {
   database: Sequelize | undefined;
   readonly sequelize: Sequelize;
-  setDatabase: () => Promise<void>;
+  setSequelize: () => Promise<void>;
 } = {
   database: undefined,
   get sequelize() {
@@ -14,10 +14,10 @@ let database: {
     }
     return this.database;
   },
-  setDatabase: async function () {
+  setSequelize: async function () {
     const config = await getDbConfig();
     this.database = new Sequelize(config);
-    logger.log.info("数据库实例创建成功。");
+    logger.winston.info("数据库实例创建成功。");
   },
 };
 
@@ -53,7 +53,7 @@ async function testConnection() {
       throw new Error(`数据库连接失败，原因:${e}。`);
     })
     .finally(() => {
-      logger.log.info("数据库连接成功。");
+      logger.winston.info("数据库连接成功。");
     });
 }
 
@@ -67,7 +67,7 @@ async function initModel() {
       `同步Model时，获取文件名失败。检查common/model文件夹内是否有文件。`
     );
   }
-  logger.log.info(`数据库开始同步。`);
+  logger.winston.info(`数据库开始同步。`);
   for (const fileDirent of fileDirents) {
     if (!fileDirent.fileName) {
       continue;
@@ -80,7 +80,7 @@ async function initModel() {
       await modelFile
         .model()
         .sync({ alter: { drop: false } })
-        .then((_) => logger.log.info(`表${modelFile.model.name}同步成功。`))
+        .then((_) => logger.winston.info(`表${modelFile.model.name}同步成功。`))
         .catch((e) => {
           throw new Error(`\n表${modelFile.model.name}同步失败。原因:${e}。`);
         });
@@ -89,14 +89,14 @@ async function initModel() {
       }
     }
   }
-  logger.log.info(`数据库完成同步。`);
+  logger.winston.info(`数据库完成同步。`);
 }
 
 function init() {
   return {
     order: 1,
     startInit: async () => {
-      await database.setDatabase();
+      await database.setSequelize();
       await testConnection();
       await initModel();
     },
