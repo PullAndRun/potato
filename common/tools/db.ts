@@ -58,8 +58,7 @@ async function testConnection() {
 }
 
 /**
- * 同步common/model文件夹下所有model。
- * 执行model文件内的init()函数来同步model。
+ * 轮番执行common/tools文件夹内的model和init函数。
  */
 async function initModel() {
   const fileDirents = await getFileDirents("common/model");

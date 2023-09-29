@@ -74,7 +74,7 @@ async function getConfig(fileName: string) {
     assert: { type: "json" },
   });
   const config = configJson["default"];
-  const server = getCmdArg("--server", { allowUndefined: false });
+  const server = getCmdArg("--server", { allowUndefined: true });
   if (!server) {
     return {
       ...config,
@@ -121,7 +121,7 @@ function getCmdArg(
     | "--dbUser"
     | "--dbPswd"
     | "--server",
-  option: { allowUndefined: boolean } = { allowUndefined: true }
+  option: { allowUndefined: boolean } = { allowUndefined: false }
 ) {
   const spec = {
     "--dbHost": String,
@@ -134,7 +134,7 @@ function getCmdArg(
   const cmdArgs = getCmdArgs({
     [type]: spec[type],
   });
-  if (option.allowUndefined && cmdArgs[type] === undefined) {
+  if (!option.allowUndefined && cmdArgs[type] === undefined) {
     throw new Error(
       `获取启动命令参数失败。检查启动命令的参数是否包括${type}:${spec[type].name}。`
     );
