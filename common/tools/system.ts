@@ -2,6 +2,7 @@ import arg from "arg";
 import dayjs from "dayjs";
 import fs from "fs/promises";
 import path from "path";
+import { logger } from "./log.js";
 
 /**
  * 格式化Args成JSON。
@@ -10,7 +11,7 @@ import path from "path";
  * @returns 成功返回Args的JSON。失败返回undefined。
  */
 function parseArgs(param: { spec: arg.Spec; argv: Array<string> }) {
-  return arg(param.spec, { argv: param.argv });
+  return arg(param.spec, { argv: param.argv, permissive: true });
 }
 
 /**
@@ -73,8 +74,8 @@ async function getConfig(fileName: string) {
     assert: { type: "json" },
   });
   const config = configJson["default"];
-  const serverName = getCmdArgs({ "--server": String });
-  if (!serverName || !serverName["--server"]) {
+  const server = getCmdArg("--server", { allowUndefined: false });
+  if (!server) {
     return {
       ...config,
       ...(config["dev"] || {}),
@@ -82,7 +83,7 @@ async function getConfig(fileName: string) {
   }
   return {
     ...config,
-    ...(config[serverName["--server"]] || {}),
+    ...(config[server] || {}),
   };
 }
 
@@ -108,8 +109,19 @@ function formatDate(template: string) {
   return dayjs().format(template);
 }
 
+/**
+ * 获取一个命令行参数。
+ * @param option.allowUndefined undefined返回值是否crash，默认crash。
+ */
 function getCmdArg(
-  type: "--dbHost" | "--dbPort" | "--dbName" | "--dbUser" | "--dbPswd"
+  type:
+    | "--dbHost"
+    | "--dbPort"
+    | "--dbName"
+    | "--dbUser"
+    | "--dbPswd"
+    | "--server",
+  option: { allowUndefined: boolean } = { allowUndefined: true }
 ) {
   const spec = {
     "--dbHost": String,
@@ -117,16 +129,45 @@ function getCmdArg(
     "--dbName": String,
     "--dbUser": String,
     "--dbPswd": String,
+    "--server": String,
   };
   const cmdArgs = getCmdArgs({
     [type]: spec[type],
   });
-  if (cmdArgs[type] === undefined) {
+  if (option.allowUndefined && cmdArgs[type] === undefined) {
     throw new Error(
       `获取启动命令参数失败。检查启动命令的参数是否包括${type}:${spec[type].name}。`
     );
   }
   return cmdArgs[type];
+}
+
+async function initSystem() {
+  const fileDirents = await getFileDirents("common/tools");
+  if (!fileDirents || !fileDirents.length) {
+    throw new Error(
+      `初始化系统时，获取文件名失败。检查common/tools文件夹内是否有文件。`
+    );
+  }
+  console.log(
+    `{"level":"info","message":"系统初始化开始。","timestamp":"${new Date().toISOString()}"}`
+  );
+  const initArr = [];
+  for (const fileDirent of fileDirents) {
+    if (!fileDirent.fileName) {
+      continue;
+    }
+    const toolsFile = await import(
+      `${fileDirent.path}/${fileDirent.fileName}.js`
+    );
+    if (toolsFile && toolsFile.init) {
+      initArr[toolsFile.init().order] = toolsFile.init();
+    }
+  }
+  for (const init of initArr) {
+    await init.startInit();
+  }
+  logger.log.info(`系统初始化完成。`);
 }
 
 export {
@@ -136,5 +177,6 @@ export {
   getConfig,
   getFileDirents,
   getRootPath,
+  initSystem,
   parseJson,
 };

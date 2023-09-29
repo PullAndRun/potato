@@ -46,11 +46,17 @@ const logger: {
         }),
       ],
     });
+    logger.log.info("Logger实例创建成功。");
   },
 };
 
-async function init() {
-  await logger.setLogger();
+function init() {
+  return {
+    order: 0,
+    startInit: async () => {
+      await logger.setLogger();
+    },
+  };
 }
 
 export { init, logger };

@@ -17,6 +17,7 @@ let database: {
   setDatabase: async function () {
     const config = await getDbConfig();
     this.database = new Sequelize(config);
+    logger.log.info("数据库实例创建成功。");
   },
 };
 
@@ -46,9 +47,14 @@ async function getDbConfig() {
  * 测试失败则crash。
  */
 async function testConnection() {
-  return database.sequelize.authenticate().catch((e) => {
-    throw new Error(`数据库连接失败，原因:${e}。`);
-  });
+  return database.sequelize
+    .authenticate()
+    .catch((e) => {
+      throw new Error(`数据库连接失败，原因:${e}。`);
+    })
+    .finally(() => {
+      logger.log.info("数据库连接成功。");
+    });
 }
 
 /**
@@ -59,9 +65,10 @@ async function initModel() {
   const fileDirents = await getFileDirents("common/model");
   if (!fileDirents || !fileDirents.length) {
     throw new Error(
-      `同步所有Model时，获取Model文件名失败。检查common/model文件夹内是否有文件。`
+      `同步Model时，获取文件名失败。检查common/model文件夹内是否有文件。`
     );
   }
+  logger.log.info(`数据库开始同步。`);
   for (const fileDirent of fileDirents) {
     if (!fileDirent.fileName) {
       continue;
@@ -71,22 +78,27 @@ async function initModel() {
       model: () => ModelStatic<Model<any, any>>;
     } = await import(`${fileDirent.path}/${fileDirent.fileName}.js`);
     if (modelFile && modelFile.model) {
-      modelFile
+      await modelFile
         .model()
         .sync({ alter: { drop: false } })
-        .then((_) => logger.log.info(`表${modelFile.name}同步完毕。`))
+        .then((_) => logger.log.info(`表${modelFile.model.name}同步成功。`))
         .catch((e) => {
-          throw new Error(`\n表${modelFile.name}同步失败。原因:${e}。`);
+          throw new Error(`\n表${modelFile.model.name}同步失败。原因:${e}。`);
         });
     }
   }
-  logger.log.info(`数据库同步完成。`);
+  logger.log.info(`数据库完成同步。`);
 }
 
-async function init() {
-  await database.setDatabase();
-  await testConnection();
-  await initModel();
+function init() {
+  return {
+    order: 1,
+    startInit: async () => {
+      await database.setDatabase();
+      await testConnection();
+      await initModel();
+    },
+  };
 }
 
 export { database, init };
