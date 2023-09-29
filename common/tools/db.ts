@@ -74,7 +74,7 @@ async function initModel() {
       continue;
     }
     const modelFile: {
-      name: string;
+      init: any;
       model: () => ModelStatic<Model<any, any>>;
     } = await import(`${fileDirent.path}/${fileDirent.fileName}.js`);
     if (modelFile && modelFile.model) {
@@ -85,6 +85,9 @@ async function initModel() {
         .catch((e) => {
           throw new Error(`\n表${modelFile.model.name}同步失败。原因:${e}。`);
         });
+      if (modelFile.init) {
+        await modelFile.init();
+      }
     }
   }
   logger.log.info(`数据库完成同步。`);

@@ -142,6 +142,10 @@ function getCmdArg(
   return cmdArgs[type];
 }
 
+/**
+ * 轮番执行common/tools文件夹内的init函数。
+ * 注意init函数返回值的order是执行顺序。
+ */
 async function initSystem() {
   const fileDirents = await getFileDirents("common/tools");
   if (!fileDirents || !fileDirents.length) {
