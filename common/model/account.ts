@@ -1,7 +1,7 @@
 import { DataTypes, Op } from "sequelize";
-import { database, dbSync } from "../tools/db.js";
+import { database } from "../tools/db.js";
 
-function accountModel() {
+function model() {
   return database.sequelize.define("account", {
     id: {
       type: DataTypes.INTEGER,
@@ -27,7 +27,7 @@ function accountModel() {
 }
 
 async function getQQAccount() {
-  return accountModel()
+  return model()
     .findAll({
       where: {
         qq: {
@@ -40,8 +40,4 @@ async function getQQAccount() {
     .catch((_) => undefined);
 }
 
-async function init() {
-  await dbSync(accountModel());
-}
-
-export { getQQAccount, init };
+export { getQQAccount, model };

@@ -10,11 +10,7 @@ import path from "path";
  * @returns 成功返回Args的JSON。失败返回undefined。
  */
 function parseArgs(param: { spec: arg.Spec; argv: Array<string> }) {
-  try {
-    return arg(param.spec, { argv: param.argv });
-  } catch (_) {
-    return undefined;
-  }
+  return arg(param.spec, { argv: param.argv });
 }
 
 /**
@@ -125,12 +121,12 @@ function getCmdArg(
   const cmdArgs = getCmdArgs({
     [type]: spec[type],
   });
-  if (cmdArgs === undefined) {
+  if (cmdArgs[type] === undefined) {
     throw new Error(
-      `获取启动命令参数失败。检查启动命令的参数是否包括${type}:${spec[type]}。`
+      `获取启动命令参数失败。检查启动命令的参数是否包括${type}:${spec[type].name}。`
     );
   }
-  return;
+  return cmdArgs[type];
 }
 
 export {
