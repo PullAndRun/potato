@@ -112,8 +112,30 @@ function formatDate(template: string) {
   return dayjs().format(template);
 }
 
+function getCmdArg(
+  type: "--dbHost" | "--dbPort" | "--dbName" | "--dbUser" | "--dbPswd"
+) {
+  const spec = {
+    "--dbHost": String,
+    "--dbPort": Number,
+    "--dbName": String,
+    "--dbUser": String,
+    "--dbPswd": String,
+  };
+  const cmdArgs = getCmdArgs({
+    [type]: spec[type],
+  });
+  if (cmdArgs === undefined) {
+    throw new Error(
+      `获取启动命令参数失败。检查启动命令的参数是否包括${type}:${spec[type]}。`
+    );
+  }
+  return;
+}
+
 export {
   formatDate,
+  getCmdArg,
   getCmdArgs,
   getConfig,
   getFileDirents,

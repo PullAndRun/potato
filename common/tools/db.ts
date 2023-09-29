@@ -1,29 +1,35 @@
 import { BelongsToOptions, Model, ModelStatic, Sequelize } from "sequelize";
-import { getLogger } from "./log.js";
-import { getCmdArgs, getConfig, getFileDirents } from "./system.js";
+import { logger } from "./log.js";
+import { getCmdArg, getConfig, getFileDirents } from "./system.js";
 
-let sequelize: Sequelize | undefined = undefined;
+let database: {
+  database: Sequelize | undefined;
+  readonly sequelize: Sequelize;
+  setDatabase: () => Promise<void>;
+} = {
+  database: undefined,
+  get sequelize() {
+    if (!this.database) {
+      throw new Error(`Sequelize未初始化。`);
+    }
+    return this.database;
+  },
+  setDatabase: async function () {
+    const config = await getDbConfig();
+    this.database = new Sequelize(config);
+  },
+};
 
 /**
  * 数据库配置。
  */
 async function getDbConfig() {
-  const cmdArgs = getCmdArgs({
-    "--dbHost": String,
-    "--dbPort": Number,
-    "--dbName": String,
-    "--dbUser": String,
-    "--dbPswd": String,
-  });
-  if (!cmdArgs) {
-    throw new Error(`从启动脚本获取数据库配置失败。`);
-  }
   const dbArgs = {
-    host: cmdArgs["--dbHost"],
-    port: cmdArgs["--dbPort"],
-    database: cmdArgs["--dbName"],
-    username: cmdArgs["--dbUser"],
-    password: cmdArgs["--dbPswd"],
+    host: getCmdArg("--dbHost"),
+    port: getCmdArg("--dbPort"),
+    database: getCmdArg("--dbName"),
+    username: getCmdArg("--dbUser"),
+    password: getCmdArg("--dbPswd"),
   };
   const config = await getConfig("db");
   if (!config) {
@@ -40,11 +46,9 @@ async function getDbConfig() {
  * 测试失败则crash。
  */
 async function testConnection() {
-  return getSequelize()
-    .authenticate()
-    .catch((e) => {
-      throw new Error(`数据库连接失败，原因:${e}。`);
-    });
+  return database.sequelize.authenticate().catch((e) => {
+    throw new Error(`数据库连接失败，原因:${e}。`);
+  });
 }
 
 /**
@@ -70,7 +74,7 @@ function belongsTo(
 async function dbSync(model: ModelStatic<Model<any, any>>) {
   model
     .sync({ alter: { drop: false } })
-    .then((_) => getLogger().info(`表${model.name}同步完毕。`))
+    .then((_) => logger.log.info(`表${model.name}同步完毕。`))
     .catch((e) => {
       throw new Error(`\n表${model.name}同步失败。原因:${e}。`);
     });
@@ -96,31 +100,13 @@ async function initModel() {
       await model.init();
     }
   }
-  getLogger().info(`数据库同步完成。`);
-}
-
-/**
- * 初始化Sequelize。
- */
-async function setSequelize() {
-  const config = await getDbConfig();
-  sequelize = new Sequelize(config);
-}
-
-/**
- * 获取Sequelize。
- */
-function getSequelize() {
-  if (!sequelize) {
-    throw new Error(`Sequelize未初始化。`);
-  }
-  return sequelize;
+  logger.log.info(`数据库同步完成。`);
 }
 
 async function init() {
-  await setSequelize();
+  await database.setDatabase();
   await testConnection();
   await initModel();
 }
 
-export { belongsTo, dbSync, getSequelize, init };
+export { belongsTo, database, dbSync, init };

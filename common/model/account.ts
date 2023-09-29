@@ -1,8 +1,8 @@
 import { DataTypes, Op } from "sequelize";
-import { dbSync, getSequelize } from "../tools/db.js";
+import { database, dbSync } from "../tools/db.js";
 
 function accountModel() {
-  return getSequelize().define("account", {
+  return database.sequelize.define("account", {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
