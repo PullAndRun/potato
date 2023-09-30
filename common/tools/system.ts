@@ -2,6 +2,7 @@ import arg from "arg";
 import dayjs from "dayjs";
 import fs from "fs/promises";
 import path from "path";
+import readline from "readline";
 import { logger } from "./log.js";
 
 /**
@@ -27,8 +28,15 @@ function getCmdArgs(spec: arg.Spec) {
  * 获取项目根目录位置。
  * @returns 项目根目录位置。
  */
-function getRootPath() {
-  return path.resolve();
+function getPath(v: string = "") {
+  return path.resolve(v);
+}
+
+/**
+ * 判断项目的目录是否存在。
+ */
+async function isFolderExist(path: string) {
+  return fs.realpath(path).catch((_) => undefined);
 }
 
 /**
@@ -174,13 +182,36 @@ async function initSystem() {
   logger.winston.info(`系统初始化完成。`);
 }
 
+/**
+ * 是否开发模式。
+ */
+function isDev() {
+  return !!getCmdArg("--server", { allowUndefined: true });
+}
+
+async function getCMDInput(question: string): Promise<string> {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+  return new Promise((resolve) =>
+    rl.question(question + "\n", (answer) => {
+      rl.close();
+      resolve(answer.trim());
+    })
+  );
+}
+
 export {
   formatDate,
+  getCMDInput,
   getCmdArg,
   getCmdArgs,
   getConfig,
   getFileDirents,
-  getRootPath,
+  getPath,
   initSystem,
+  isDev,
+  isFolderExist,
   parseJson,
 };

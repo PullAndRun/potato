@@ -9,17 +9,29 @@ const database: {
 } = {
   database: undefined,
   get sequelize() {
-    if (!this.database) {
-      throw new Error(`Sequelize未初始化。`);
-    }
-    return this.database;
+    return getSequelize();
   },
-  setSequelize: async function () {
-    const config = await getDbConfig();
-    this.database = new Sequelize(config);
-    logger.winston.info("数据库实例创建成功。");
-  },
+  setSequelize,
 };
+
+/**
+ * 创建数据库实例。
+ */
+async function setSequelize() {
+  const config = await getDbConfig();
+  database.database = new Sequelize(config);
+  logger.winston.info("数据库实例创建成功。");
+}
+
+/**
+ * 获取数据库实例。
+ */
+function getSequelize() {
+  if (!database.database) {
+    throw new Error(`Sequelize未初始化。`);
+  }
+  return database.database;
+}
 
 /**
  * 数据库配置。
