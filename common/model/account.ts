@@ -353,7 +353,11 @@ async function qqAccountDestroy(account: Partial<IQQAccount>) {
 }
 
 export {
+  IBaiduTranslateAccount,
+  INeteaseMusicAccount,
+  IOpenaiAccount,
   IQQAccount,
+  ISaucenaoAccount,
   baiduTranslateAccountCreate,
   baiduTranslateAccountDestroy,
   baiduTranslateAccountFindAll,

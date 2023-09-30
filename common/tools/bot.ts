@@ -11,15 +11,15 @@ interface IBot {
 
 const bot: {
   bots: Array<IBot>;
-  getBots: () => Array<IBot>;
+  getOnlineBots: () => Array<IBot>;
   getBot: () => IBot;
   getBotByNickName: (name: string) => IBot | undefined;
   getBotByUin: (uin: string) => IBot | undefined;
-  setBot: () => void;
+  setBot: () => Promise<void>;
 } = {
   bots: [],
   getBot,
-  getBots,
+  getOnlineBots,
   getBotByNickName,
   getBotByUin,
   setBot,
@@ -92,24 +92,14 @@ async function login(accounts: Array<IQQAccount>) {
  * 使用昵称获取登陆的bot实例。
  */
 function getBotByNickName(nickName: String) {
-  return getBots().find((bot) => bot.nickName === nickName);
-}
-
-/**
- * 获取所有登陆的bot实例。
- */
-function getBots() {
-  if (!bot.bots.length) {
-    throw new Error(`icqq未初始化。`);
-  }
-  return bot.bots;
+  return getOnlineBots().find((bot) => bot.nickName === nickName);
 }
 
 /**
  * 使用qq号获取登陆的bot实例。
  */
 function getBotByUin(uin: string) {
-  return getBots().find((bot) => bot.client.uin.toString() === uin);
+  return getOnlineBots().find((bot) => bot.client.uin.toString() === uin);
 }
 
 /**
@@ -130,7 +120,7 @@ async function setBot() {
   const account = await getAllQQAccount();
   const liveBots = await login(account);
   liveBots.forEach((newBot) => {
-    const isBotExist = getBots().filter(
+    const isBotExist = getOnlineBots().filter(
       (oldBot) =>
         oldBot.client.uin === newBot.client.uin ||
         oldBot.nickName === newBot.nickName
@@ -142,15 +132,31 @@ async function setBot() {
   });
 }
 
+function getOnlineBots() {
+  if (!bot.bots.length) {
+    throw new Error(`icqq未初始化。`);
+  }
+  return bot.bots.filter((bot) => bot.client.isOnline());
+}
+
 /**
  * 获取已登录的bot实例的头一个实例。
  */
 function getBot() {
-  const bots = getBots();
+  const bots = getOnlineBots();
   if (!bots.length || !bots[0]) {
     throw new Error(`获取bot失败，bot未初始化。`);
   }
   return bots[0];
 }
 
-export { bot };
+function init() {
+  return {
+    order: 2,
+    startInit: async () => {
+      await bot.setBot();
+    },
+  };
+}
+
+export { bot, init };

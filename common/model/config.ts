@@ -81,6 +81,7 @@ async function botConfigDestroy(config: Partial<IBotConfig>) {
 }
 
 export {
+  IBotConfig,
   botConfigCreate,
   botConfigDestroy,
   botConfigFindAll,
