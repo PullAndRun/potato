@@ -2,7 +2,7 @@ import { Model, ModelStatic, Sequelize } from "sequelize";
 import { logger } from "./log.js";
 import { getCmdArg, getConfig, getFileDirents } from "./system.js";
 
-let database: {
+const database: {
   database: Sequelize | undefined;
   readonly sequelize: Sequelize;
   setSequelize: () => Promise<void>;
