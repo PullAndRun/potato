@@ -53,6 +53,7 @@ function model() {
 async function openaiAccountFindAll() {
   return model()
     .findAll({
+      attributes: ["openai"],
       where: {
         openai: {
           [Op.not]: null,
@@ -66,6 +67,7 @@ async function openaiAccountFindAll() {
 async function openaiAccountFindOne(account: Partial<IOpenai>) {
   return model()
     .findOne({
+      attributes: ["openai"],
       where: {
         openai: account,
       },
@@ -74,10 +76,14 @@ async function openaiAccountFindOne(account: Partial<IOpenai>) {
     .catch((_) => undefined);
 }
 
-async function openaiAccountCreate(account: IOpenai) {
+async function openaiAccountCreate(accounts: Array<IOpenai>) {
   return model()
-    .create({ openai: account })
-    .then((v) => <IOpenai>v.toJSON())
+    .bulkCreate(
+      accounts.map((account) => {
+        return { openai: account };
+      })
+    )
+    .then((v) => v.map((v) => <IOpenai>v.toJSON()))
     .catch((_) => undefined);
 }
 
@@ -105,6 +111,7 @@ async function openaiAccountDestroy(account: Partial<IOpenai>) {
 async function saucenaoAccountFindAll() {
   return model()
     .findAll({
+      attributes: ["saucenao"],
       where: {
         saucenao: {
           [Op.not]: null,
@@ -118,6 +125,7 @@ async function saucenaoAccountFindAll() {
 async function saucenaoAccountFindOne(account: Partial<ISaucenao>) {
   return model()
     .findOne({
+      attributes: ["saucenao"],
       where: {
         saucenao: account,
       },
@@ -126,10 +134,14 @@ async function saucenaoAccountFindOne(account: Partial<ISaucenao>) {
     .catch((_) => undefined);
 }
 
-async function saucenaoAccountCreate(account: ISaucenao) {
+async function saucenaoAccountCreate(accounts: Array<ISaucenao>) {
   return model()
-    .create({ saucenao: account })
-    .then((v) => <ISaucenao>v.toJSON())
+    .bulkCreate(
+      accounts.map((account) => {
+        return { saucenao: account };
+      })
+    )
+    .then((v) => v.map((v) => <ISaucenao>v.toJSON()))
     .catch((_) => undefined);
 }
 
@@ -157,6 +169,7 @@ async function saucenaoAccountDestroy(account: Partial<ISaucenao>) {
 async function neteaseMusicAccountFindAll() {
   return model()
     .findAll({
+      attributes: ["neteaseMusic"],
       where: {
         neteaseMusic: {
           [Op.not]: null,
@@ -170,6 +183,7 @@ async function neteaseMusicAccountFindAll() {
 async function neteaseMusicAccountFindOne(account: Partial<INeteaseMusic>) {
   return model()
     .findOne({
+      attributes: ["neteaseMusic"],
       where: {
         neteaseMusic: account,
       },
@@ -178,10 +192,14 @@ async function neteaseMusicAccountFindOne(account: Partial<INeteaseMusic>) {
     .catch((_) => undefined);
 }
 
-async function neteaseMusicAccountCreate(account: INeteaseMusic) {
+async function neteaseMusicAccountCreate(accounts: Array<INeteaseMusic>) {
   return model()
-    .create({ neteaseMusic: account })
-    .then((v) => <INeteaseMusic>v.toJSON())
+    .bulkCreate(
+      accounts.map((account) => {
+        return { neteaseMusic: account };
+      })
+    )
+    .then((v) => v.map((v) => <INeteaseMusic>v.toJSON()))
     .catch((_) => undefined);
 }
 
@@ -210,6 +228,7 @@ async function baiduTranslateAccountFindAll() {
   return model()
     .findAll({
       where: {
+        attribute: ["baiduTranslate"],
         baiduTranslate: {
           [Op.not]: null,
         },
@@ -222,6 +241,7 @@ async function baiduTranslateAccountFindAll() {
 async function baiduTranslateAccountFindOne(account: Partial<IBaiduTranslate>) {
   return model()
     .findOne({
+      attributes: ["baiduTranslate"],
       where: {
         baiduTranslate: account,
       },
@@ -230,10 +250,14 @@ async function baiduTranslateAccountFindOne(account: Partial<IBaiduTranslate>) {
     .catch((_) => undefined);
 }
 
-async function baiduTranslateAccountCreate(account: IBaiduTranslate) {
+async function baiduTranslateAccountCreate(accounts: Array<IBaiduTranslate>) {
   return model()
-    .create({ baiduTranslate: account })
-    .then((v) => <IBaiduTranslate>v.toJSON())
+    .bulkCreate(
+      accounts.map((account) => {
+        return { baiduTranslate: account };
+      })
+    )
+    .then((v) => v.map((v) => <IBaiduTranslate>v.toJSON()))
     .catch((_) => undefined);
 }
 
@@ -261,6 +285,7 @@ async function baiduTranslateAccountDestroy(account: Partial<IBaiduTranslate>) {
 async function qqAccountFindAll() {
   return model()
     .findAll({
+      attributes: ["qq"],
       where: {
         qq: {
           [Op.not]: null,
@@ -274,6 +299,7 @@ async function qqAccountFindAll() {
 async function qqAccountFindOne(account: Partial<IQQ>) {
   return model()
     .findOne({
+      attributes: ["qq"],
       where: {
         qq: account,
       },
