@@ -40,24 +40,30 @@ async function isFolderExist(path: string) {
 }
 
 /**
- * 获取某文件夹下的文件名。
+ * 获取某文件夹下的文件信息。
  * @param folder 文件夹，示例：common/tools。
- * @returns 成功返回文件名，失败返回undefined。
+ * @returns 成功返回文件信息，失败返回undefined。
  */
 async function getFileDirents(folder: string) {
-  return fs
+  const fileDirents = await fs
     .readdir(path.resolve(folder), { withFileTypes: true })
     .then((dirent) =>
       dirent.map((v) => {
         const [fileName, ...fileType] = v.name.split(".");
         return {
-          ...v,
-          fileName: fileName,
-          fileType: fileType.join("."),
+          type: fileType.join("."),
+          name: fileName || "",
+          fullName: v.name,
+          path: v.path,
+          fullPath: v.path + v.name,
         };
       })
     )
     .catch((_) => undefined);
+  if (!fileDirents || !fileDirents.length) {
+    throw new Error(`获取fileDirents失败，检查目录"${folder}"是否有文件。`);
+  }
+  return fileDirents;
 }
 
 /**
@@ -70,11 +76,11 @@ async function getConfig(fileName: string) {
   if (
     !fileDirents ||
     !fileDirents.length ||
-    !fileDirents.map((v) => v.fileName).includes(fileName)
+    !fileDirents.map((v) => v.name).includes(fileName)
   ) {
     return undefined;
   }
-  const fileDirent = fileDirents.filter((v) => v.fileName === fileName)[0];
+  const fileDirent = fileDirents.filter((v) => v.name === fileName)[0];
   if (!fileDirent) {
     return undefined;
   }
@@ -166,12 +172,10 @@ async function initSystem() {
   );
   const initArr = [];
   for (const fileDirent of fileDirents) {
-    if (!fileDirent.fileName) {
+    if (!fileDirent.name) {
       continue;
     }
-    const toolsFile = await import(
-      `${fileDirent.path}/${fileDirent.fileName}.js`
-    );
+    const toolsFile = await import(`${fileDirent.path}/${fileDirent.name}.js`);
     if (toolsFile && toolsFile.init) {
       initArr[toolsFile.init().order] = toolsFile.init();
     }
@@ -179,7 +183,7 @@ async function initSystem() {
   for (const init of initArr) {
     await init.startInit();
   }
-  logger.winston.info(`系统初始化完成。`);
+  logger("info", "系统初始化完成。");
 }
 
 /**

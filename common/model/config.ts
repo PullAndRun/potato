@@ -1,5 +1,5 @@
-import { DataTypes, Op } from "sequelize";
-import { database } from "../tools/db.js";
+import { DataTypes, Model, ModelStatic, Op } from "sequelize";
+import { useSequelize } from "../tools/db.js";
 
 interface IBotConfig {
   server: string | null;
@@ -9,83 +9,35 @@ interface IBotConfig {
   signServer: string;
 }
 
-function model() {
-  return database.sequelize.define("config", {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
-    },
-    bot: {
-      type: DataTypes.JSON,
-    },
-  });
-}
-
-async function botConfigFindAll() {
-  return model()
-    .findAll({
-      attributes: ["bot"],
-      where: {
-        bot: {
-          [Op.not]: null,
+function useModel<T>(getModel: (model: ModelStatic<Model<any, any>>) => T): T {
+  return getModel(
+    useSequelize((sequelize) =>
+      sequelize.define("config", {
+        id: {
+          type: DataTypes.INTEGER,
+          autoIncrement: true,
+          primaryKey: true,
         },
-      },
-    })
-    .then((v) => v.map((v) => <IBotConfig>v.toJSON()))
-    .catch((_) => undefined);
-}
-
-async function botConfigFindOne(config: Partial<IBotConfig>) {
-  return model()
-    .findOne({
-      attributes: ["bot"],
-      where: {
-        bot: config,
-      },
-    })
-    .then((v) => <IBotConfig>v?.toJSON())
-    .catch((_) => undefined);
-}
-
-async function botConfigCreate(configs: Array<IBotConfig>) {
-  return model()
-    .bulkCreate(
-      configs.map((config) => {
-        return { bot: config };
+        bot: {
+          type: DataTypes.JSON,
+        },
       })
     )
-    .then((v) => v.map((v) => <IBotConfig>v.toJSON()))
-    .catch((_) => undefined);
+  );
 }
 
-async function botConfigUpdate(param: {
-  find: Partial<IBotConfig>;
-  update: Partial<IBotConfig>;
-}) {
-  return model()
-    .update({ bot: param.find }, { where: param.update })
-    .then((v) => v[0])
-    .catch((_) => undefined);
+async function botConfigFindOne(server: string | undefined) {
+  return useModel((model) =>
+    model
+      .findOne({
+        attributes: ["bot"],
+        where: {
+          server: server || null,
+        },
+      })
+      .then((v) => <IBotConfig>v?.toJSON())
+      .catch((_) => undefined)
+  );
 }
 
-async function botConfigDestroy(config: Partial<IBotConfig>) {
-  return model()
-    .destroy({
-      where: {
-        bot: config,
-      },
-    })
-    .then((v) => !!v)
-    .catch((_) => undefined);
-}
-
-export {
-  IBotConfig,
-  botConfigCreate,
-  botConfigDestroy,
-  botConfigFindAll,
-  botConfigFindOne,
-  botConfigUpdate,
-  model,
-};
+export { useModel, botConfigFindOne };

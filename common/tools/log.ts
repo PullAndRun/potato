@@ -6,37 +6,36 @@ import { formatDate, getConfig } from "./system.js";
  */
 const { combine, timestamp, json } = format;
 
-const logger: {
-  logger: Logger | undefined;
-  readonly winston: Logger;
-  setWinston: () => Promise<void>;
-} = {
-  logger: undefined,
-  get winston() {
-    return getWinston();
-  },
-  setWinston,
-};
+let loggerInstance: Logger | undefined = undefined;
+type logLevels =
+  | "emerg"
+  | "alert"
+  | "crit"
+  | "error"
+  | "warning"
+  | "notice"
+  | "info"
+  | "debug";
 
 /**
- * 获取winston实例。
+ * logger实例。
  */
-function getWinston() {
-  if (!logger.logger) {
+function logger(level: logLevels, msg: string) {
+  if (!loggerInstance) {
     throw new Error(`Logger未初始化。`);
   }
-  return logger.logger;
+  return loggerInstance[level](msg);
 }
 
 /**
- * 创建winston实例。
+ * 重新创建logger实例。
  */
-async function setWinston() {
+async function setLogger() {
   const logConfig = await getConfig("log");
   if (!logConfig) {
     throw new Error(`获取日志配置文件失败。检查config/log.json。`);
   }
-  logger.logger = createLogger({
+  loggerInstance = createLogger({
     format: combine(timestamp(), json()),
     ...logConfig,
     transports: [
@@ -59,14 +58,14 @@ async function setWinston() {
       }),
     ],
   });
-  logger.winston.info("Logger实例创建成功。");
+  logger("info", "Logger实例创建成功。");
 }
 
 function init() {
   return {
     order: 0,
     startInit: async () => {
-      await logger.setWinston();
+      await setLogger();
     },
   };
 }

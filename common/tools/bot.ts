@@ -1,8 +1,8 @@
 import { Client, LogLevel, createClient } from "icqq";
 import { IQQAccount, qqAccountFindAll } from "../model/account.js";
-import { getCMDInput, getPath, isDev, isFolderExist } from "./system.js";
 import { botConfigFindOne } from "../model/config.js";
 import { logger } from "./log.js";
+import { getCMDInput, getCmdArg, getPath, isFolderExist } from "./system.js";
 
 interface IBot {
   nickName: string;
@@ -32,9 +32,7 @@ async function login(accounts: Array<IQQAccount>) {
   const ffmpegPath = getPath("bin/ffmpesg");
   const ffmpegExist = await isFolderExist(ffmpegPath);
   const onlineBots: Array<IBot> = [];
-  const config = await (isDev()
-    ? botConfigFindOne({ server: null })
-    : botConfigFindOne({ server: "aliyun" }));
+  const config = await botConfigFindOne(getCmdArg("--server"));
   if (!config) {
     throw new Error("从数据库获取bot设置失败。");
   }
@@ -80,7 +78,7 @@ async function login(accounts: Array<IQQAccount>) {
         }
       });
     await client.login(parseFloat(account.id), account.password).catch((e) => {
-      logger.winston.error(`bot登陆失败，uin:${account.id}，错误:${e}`);
+      logger("error", `bot登陆失败，uin:${account.id}，错误:${e}`);
       return undefined;
     });
     onlineBots.push({ nickName: account.nickName, client: client });
@@ -132,11 +130,26 @@ async function setBot() {
   });
 }
 
+/**
+ * 获取在线的bot。
+ */
 function getOnlineBots() {
   if (!bot.bots.length) {
     throw new Error(`icqq未初始化。`);
   }
   return bot.bots.filter((bot) => bot.client.isOnline());
+}
+
+function setEventListener() {
+  const masterBot = bot.getBot();
+  masterBot.client.on("message.group", async (event) => {});
+}
+
+/**
+ * 移除不在线的bot。
+ */
+function removeOfflineBots() {
+  bot.bots = getOnlineBots();
 }
 
 /**
@@ -145,7 +158,7 @@ function getOnlineBots() {
 function getBot() {
   const bots = getOnlineBots();
   if (!bots.length || !bots[0]) {
-    throw new Error(`获取bot失败，bot未初始化。`);
+    throw new Error(`获取bot失败，bot未初始化，或无在线bot。`);
   }
   return bots[0];
 }
